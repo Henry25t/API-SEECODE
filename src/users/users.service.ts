@@ -16,30 +16,67 @@ export class UsersService {
   ) { }
   async create(createUserDto: CreateUserDto) {
     try {
-      const newUser = this.userRepository.create(createUserDto);
-      return await this.userRepository.save(newUser);
+      // Obtener el rol por su ID
+      const rol = await this.roleRepository.findOne({ where: { id: createUserDto.rolId } });
+  
+      // Crear un nuevo usuario y asignar el rol
+      const newUser = this.userRepository.create({
+        name: createUserDto.name,
+        lastName: createUserDto.lastName,
+        email: createUserDto.email,
+        password: createUserDto.password,
+        rol: rol, // Asignar el rol al usuario
+      });
+  
+      // Guardar el nuevo usuario en la base de datos
+      await this.userRepository.save(newUser);
+      // Retornar un mensaje de ok y el objeto del usuario creado
+      return {
+        ok: true,
+        newUser
+      };
+      // Sí hay errores al crear un usuario se enviara un mensaje de excepción
     } catch (error) {
-      throw new InternalServerErrorException('Ocurrió un error al crear el usuario.', error);
+      throw new InternalServerErrorException('Ocurrió un error al crear el usuario.'+ error);
     }
   }
+  
 
   async findAll() {
     try {
-      const user = await this.userRepository.find();
-      return{ok: true, user}
+      const user = await this.userRepository.find({relations: ['rol']});
+      const userRole = user.map(user => ({
+        id: user.id,
+        name: user.name,
+        lastName: user.lastName,
+        email: user.email,
+        isActive: user.isActive,
+        rol: user.rol ? user.rol.name : null,
+      }));
+      return{ok: true, user: userRole}
     } catch (error) {
-      throw new InternalServerErrorException('Ocurrió un error al obtener los usuarios.', error);
+      throw new InternalServerErrorException('Ocurrió un error al obtener los usuarios.' + error);
     }
   }
   
 
   async findOne(id: number) {
     try {
-      const user = await this.userRepository.findOne({where:{id}})
+      const user = await this.userRepository.findOne({where:{id}, relations : ['rol']})
       if (!user) {
         throw new NotFoundException(`No se encontró ningún rol con el ID ${id}`);
       }
-      return {ok: true, user}
+
+      const User = {
+        id: user.id,
+        name: user.name,
+        lastName: user.lastName,
+        email: user.email,
+        isActive: user.isActive,
+        rol: user.rol ? user.rol.name : null,
+      }
+
+      return {ok: true, User}
     } catch (error) {
       return {ok:false, error}
     }
@@ -51,9 +88,12 @@ export class UsersService {
     const rol = await this.roleRepository.findOne({ where: { id: updateUserDto.rolId } })
 
 
-    user.lastName = updateUserDto.lastName
-    user.rol = rol
     user.name = updateUserDto.name
+    user.lastName = updateUserDto.lastName
+    user.email = updateUserDto.email,
+    user.password = updateUserDto.password,
+    user.rol = rol
+    
  
     await this.userRepository.save(user)
     return{ ok: true, user}

@@ -19,7 +19,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: ['localhost:8000','http://localhost:5173','http://192.168.0.19:5173'], // Configura el origen permitido
+    origin: ['localhost:8000','http://localhost:5173','http://192.168.0.13:5174'], // Configura el origen permitido
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Configura los métodos permitidos
     allowedHeaders: ['Content-Type', 'Authorization'], // Configura los encabezados permitidos
   });
