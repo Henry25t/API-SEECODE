@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { CreateUserDto, SaveUsers } from './dto/create-user.dto';
+import { SaveUsers } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -52,7 +52,7 @@ export class UsersService {
 
   async findAll() {
     try {
-      const user = await this.userRepository.find({ relations: ['rol'] });
+      const user = await this.userRepository.find({ relations: ['rol', 'address'] });
       if (user.length > 0) {
         for (const users of user) { users.password = undefined }
         return {

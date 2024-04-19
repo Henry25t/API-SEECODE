@@ -13,8 +13,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body()createUserDto: SaveUsers) {
-    return this.usersService.create(createUserDto);
+  create(@Body()saveUsers: SaveUsers) {
+    return this.usersService.create(saveUsers);
   }
 
   @Get()
