@@ -1,4 +1,5 @@
 import { IsNotEmpty,IsNumber,IsString,} from 'class-validator'
+import { Address } from 'src/addresses/entities/address.entity';
 
 
 export class CreateUserDto {
@@ -21,4 +22,10 @@ export class CreateUserDto {
     @IsNotEmpty()
     @IsNumber()
     rolId: number;
+}
+
+export interface SaveUsers extends CreateUserDto {
+    department:   string;
+    municipality: string;
+    complement:   string;
 }

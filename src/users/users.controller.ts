@@ -1,10 +1,11 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, SaveUsers } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { get } from 'http';
 import { SearchUserDto } from './dto/search-user.dto';
 import { jwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { CreateAddressDto } from 'src/addresses/dto/create-address.dto';
 
 @UseGuards(jwtAuthGuard)
 @Controller('users')
@@ -12,7 +13,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
+  create(@Body()createUserDto: SaveUsers) {
     return this.usersService.create(createUserDto);
   }
 

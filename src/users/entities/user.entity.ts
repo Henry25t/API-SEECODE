@@ -1,6 +1,7 @@
 import { Role } from "src/roles/entities/role.entity";
 import * as  bcrypt from 'bcrypt';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, RelationId } from "typeorm";
+import { Address } from "src/addresses/entities/address.entity";
 
 @Entity("user")
 export class User {
@@ -27,6 +28,12 @@ export class User {
 
     @RelationId((user: User) => user.rol)
     rolId: number
+
+    @ManyToOne(() => Address)
+    address: Address
+
+    @RelationId((user: User ) => user.address )
+    addressId: number
 
     hashPassword(): void {
         const salt = bcrypt.genSaltSync(10);
