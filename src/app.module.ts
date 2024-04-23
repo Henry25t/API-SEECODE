@@ -8,6 +8,10 @@ import { RolesModule } from './roles/roles.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { ClientModule } from './client/client.module';
+import { ProductModule } from './product/product.module';
+import { SalesModule } from './sales/sales.module';
+import { DetailSaleModule } from './detail-sale/detail-sale.module';
 
 @Module({
   imports: [
@@ -30,6 +34,10 @@ import { AddressesModule } from './addresses/addresses.module';
     UsersModule,
     AuthModule,
     AddressesModule,
+    ClientModule,
+    ProductModule,
+    SalesModule,
+    DetailSaleModule,
   ],
   controllers: [AppController],
   providers: [AppService],

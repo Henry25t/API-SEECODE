@@ -1,5 +1,4 @@
 import { IsNotEmpty,IsNumber,IsString,} from 'class-validator'
-import { Address } from 'src/addresses/entities/address.entity';
 
 
 export class CreateUserDto {

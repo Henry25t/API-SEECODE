@@ -31,7 +31,8 @@ export class UsersService {
       const newUser = this.userRepository.create({
         name: name,
         lastName: lastName,
-        email: email, password: password,
+        email: email,
+        password: password,
         address: dataDirection,
         rol: rol, 
       });
@@ -101,7 +102,7 @@ export class UsersService {
         user.password = updateUserDto.password,
         user.rol = rol
 
-
+      user.hashPassword()
       await this.userRepository.save(user)
       return { ok: true, user }
     } catch (error) {
@@ -158,7 +159,7 @@ export class UsersService {
       }
 
     } catch (error) {
-      return HttpStatus.INTERNAL_SERVER_ERROR
+      throw new NotFoundException(`Ocurrió un erro ${error.message}`)
     }
   }
 }
