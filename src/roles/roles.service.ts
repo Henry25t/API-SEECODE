@@ -60,13 +60,19 @@ export class RolesService {
 
   async remove(id: number) {
     try {
-      const result = await this.roleRepository.delete(id);
+      const rol = await this.roleRepository.findOne({where: {id}})
+      if(!rol){
+        throw new NotFoundException(`No existe ningún registro con el id ${id}`)
+      }
+      rol.isActive = false
+      const rolDelete = await this.roleRepository.save(rol)
+      /*const result = await this.roleRepository.delete(id);
       if (result.affected === 0) {
         throw new NotFoundException(`No se encontró ningún rol con el ID ${id}`);
-      }
-      return {ok:true, result}
+      }*/
+      return {ok:true, result: rolDelete}
     } catch (error) {
-      throw new InternalServerErrorException(`Ocurrió un error al eliminar el rol con el ID ${id}: ${error.message}`);
+      throw new InternalServerErrorException(`Ocurrió un error, ${error.message}`);
     }
   }
 }

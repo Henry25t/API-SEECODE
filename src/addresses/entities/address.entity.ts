@@ -1,22 +1,21 @@
 import { User } from "src/users/entities/user.entity";
-import { Column, Entity, PrimaryGeneratedColumn,} from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, } from "typeorm";
 
 @Entity('address')
 export class Address {
-    @PrimaryGeneratedColumn()
-    id: number
+  @PrimaryGeneratedColumn()
+  id: number
 
-    @Column()
-    department: string
+  @Column()
+  department: string
 
-    @Column()
-    municipality: string
+  @Column()
+  municipality: string
 
-    @Column({default: true})
-    isActive: boolean
-
-    @Column()
-    complement: string
+  @Column()
+  complement: string
   user: any;
 
+  @Column({ default: true })
+  isActive: boolean
 }

@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Client } from 'src/client/entities/client.entity';
 import { Product } from 'src/product/entities/product.entity';
 import { DetailSale } from 'src/detail-sale/entities/detail-sale.entity';
+import { Box } from 'src/box/entities/box.entity';
 
 @Injectable()
 export class SalesService {
@@ -19,12 +20,18 @@ export class SalesService {
     private readonly productRepository: Repository<Product>,
     @InjectRepository(DetailSale)
     private readonly detailSaleRepository: Repository<DetailSale>,
+    @InjectRepository(Box)
+    private readonly boxRepository: Repository<Box>,
   ) { }
-  async create({ date, total, clientId, products }: CreateSaleDto) {
+  async create({ date, total, clientId, products, boxId }: CreateSaleDto) {
     try {
+
+      const box = await this.boxRepository.findOne({ where: { id: boxId, isActive: true } })
       const client = await this.clientRepository.findOne({ where: { id: clientId, isActive: true } });
 
-
+      if (!box) {
+        throw new NotFoundException(`No hay caja abierta con el Id: ${boxId}`);
+      }
 
       if (!client) {
         throw new NotFoundException(`Cliente con ID ${clientId} no encontrado.`);
@@ -38,6 +45,7 @@ export class SalesService {
       newSale.date = date as unknown as Date;
       newSale.total = total;
       newSale.client = client;
+      newSale.box = box;
 
 
       const savedSale = await this.saleRepository.save(newSale);
@@ -57,16 +65,23 @@ export class SalesService {
 
         await this.detailSaleRepository.save(detailSale);
 
-        product.stock -= pro.cantidad;
+        if (product.stock >= pro.cantidad) {
+          product.stock -= pro.cantidad;
+        } else {
+          throw new NotFoundException(`stock insuficiente para hacer una venta del producto ${product.name}`)
+        }
 
         await this.productRepository.save(product);
 
         newSale.total = totalPro
         await this.saleRepository.save(newSale)
-
-        client.points = totalPro
-        await this.clientRepository.save(client)
       }
+      client.points += totalPro
+      await this.clientRepository.save(client)
+
+      box.totalSales += totalPro
+      await this.boxRepository.save(box)
+
       return {
         ok: true,
         sale: savedSale,
@@ -76,6 +91,82 @@ export class SalesService {
     }
   }
 
+  async createQueryRunner({ date, total, clientId, products, boxId }: CreateSaleDto) {
+    const queryRunner = this.saleRepository.manager.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const box = await queryRunner.manager.findOne(Box, { where: { id: boxId, isActive: true } });
+      const client = await queryRunner.manager.findOne(Client, { where: { id: clientId, isActive: true } });
+
+      if (!box) {
+        throw new NotFoundException(`No hay caja abierta con el Id: ${boxId}`);
+      }
+
+      if (!client) {
+        throw new NotFoundException(`Cliente con ID ${clientId} no encontrado.`);
+      } else if (!products) {
+        throw new NotFoundException(`Producto con ID ${products} no encontrado.`);
+      }
+
+      const newSale = new Sale();
+      newSale.date = date as unknown as Date;
+      newSale.total = total;
+      newSale.client = client;
+      newSale.box = box;
+
+      const savedSale = await queryRunner.manager.save(Sale, newSale);
+
+      let totalPro = 0;
+
+      for (const pro of products) {
+        const product = await queryRunner.manager.findOne(Product, { where: { id: pro.productId, isActive: true } });
+        if(!product || product.isActive === false){
+          throw new NotAcceptableException(`no se encontró el producto con el id: ${pro.productId}`)
+        }
+
+        const detailSale = new DetailSale();
+        detailSale.product = product;
+        detailSale.cantidad = pro.cantidad;
+        detailSale.total = product.price * pro.cantidad;
+        detailSale.sale = savedSale;
+
+        totalPro += detailSale.total;
+
+        await queryRunner.manager.save(DetailSale, detailSale);
+
+        if (product.stock >= pro.cantidad) {
+          product.stock -= pro.cantidad;
+        } else {
+          throw new NotFoundException(`stock insuficiente para hacer una venta del producto ${product.name}`);
+        }
+
+        await queryRunner.manager.save(Product, product);
+      }
+      client.points += totalPro;
+      await queryRunner.manager.save(Client, client);
+
+      box.totalSales += totalPro;
+      await queryRunner.manager.save(Box, box);
+      
+      savedSale.total += totalPro;
+      await queryRunner.manager.save(Sale, savedSale);
+
+      await queryRunner.commitTransaction();
+
+      return {
+        ok: true,
+        sale: savedSale,
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new NotAcceptableException(`No se pudo crear la venta,  ${error.message}`);
+    } finally {
+      await queryRunner.release();
+    }
+  }
 
   async findAll() {
     try {

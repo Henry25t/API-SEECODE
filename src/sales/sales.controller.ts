@@ -13,6 +13,11 @@ export class SalesController {
     return this.salesService.create(createSaleDto);
   }
 
+  @Post('/createQueryRunner')
+  createQueryRunner(@Body() createSaleDto: CreateSaleDto) {
+    return this.salesService.createQueryRunner(createSaleDto);
+  }
+
   @Get()
   findAll() {
     return this.salesService.findAll();

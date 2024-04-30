@@ -21,39 +21,42 @@ export class UsersService {
     try {
       const direction = new Address()
       direction.complement = complement,
-      direction.department = department,
-      direction.municipality = municipality
+        direction.department = department,
+        direction.municipality = municipality
 
       const dataDirection = await this.addressRepository.save(direction)
 
-      const rol = await this.roleRepository.findOne({ where: { id: rolId } });
-      
+      const rol = await this.roleRepository.findOne({ where: { id: rolId, isActive: true } });
+      if (!rol || rol.isActive === false) {
+        throw new NotFoundException(`No se encontró ningún rol con el id ${rolId}`)
+      }
+
       const newUser = this.userRepository.create({
         name: name,
         lastName: lastName,
         email: email,
         password: password,
         address: dataDirection,
-        rol: rol, 
+        rol: rol
       });
       newUser.hashPassword()
 
       await this.userRepository.save(newUser);
-     
+
       return {
         ok: true,
         newUser
       };
-      
+
     } catch (error) {
-      throw new InternalServerErrorException('Ocurrió un error al crear el usuario.' + error);
+      throw new NotFoundException('Ocurrió un error al crear el usuario, ' + error.message);
     }
   }
 
 
   async findAll() {
     try {
-      const user = await this.userRepository.find({ relations: ['rol', 'address'] });
+      const user = await this.userRepository.find({ relations: ['rol', 'address'], where: { isActive: true } });
       if (user.length > 0) {
         for (const users of user) { users.password = undefined }
         return {
@@ -90,45 +93,71 @@ export class UsersService {
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, { email, lastName, name, password, rolId, complement, department, municipality }: SaveUsers) {
     try {
-      const user = await this.userRepository.findOne({ where: { id } })
-      const rol = await this.roleRepository.findOne({ where: { id: updateUserDto.rolId } })
+      const user = await this.userRepository.findOne({ where: { id }, relations: ['address', 'rol'] })
+      const rol = await this.roleRepository.findOne({ where: { id: rolId } })
+      if(!user){
+        throw new NotFoundException(`No se encontró ningún usuario con el id ${id}`);
+      }
+      if(!rol){
+        throw new NotFoundException(`No se encontró ningún rol con el id ${id}`);
+      }
 
-
-      user.name = updateUserDto.name
-      user.lastName = updateUserDto.lastName
-      user.email = updateUserDto.email,
-        user.password = updateUserDto.password,
-        user.rol = rol
+      user.name = name,
+      user.lastName = lastName,
+      user.email = email,
+      user.password = password,
+      user.rol = rol
+      if (complement || department || municipality) {
+        user.address.department = department,
+        user.address.municipality = municipality,
+        user.address.complement = complement
+        await this.addressRepository.save(user.address);
+      }
 
       user.hashPassword()
       await this.userRepository.save(user)
-      return { ok: true, user }
+      return {
+        ok: true,
+        user,
+        status: HttpStatus.OK
+      }
     } catch (error) {
-      return { ok: false, error: "Ocurrio un error" }
+      return {
+        ok: false,
+        error: "Ocurrió un error " + error.message,
+        status: HttpStatus.INTERNAL_SERVER_ERROR
+      }
     }
   }
 
   async remove(id: number) {
     try {
-      const result = await this.userRepository.delete(id);
-      if (result.affected === 0) {
+      const user = await this.userRepository.findOne({ where: { id } })
+      if (!user) {
         throw new NotFoundException(`No se encontró ningún usuario con el ID ${id}`);
       }
-      return { ok: true, result, }
+      user.isActive = false
+      const userDelete = await this.userRepository.save(user)
+      /*const result = await this.userRepository.delete(id);
+      if (result.affected === 0) {
+        throw new NotFoundException(`No se encontró ningún usuario con el ID ${id}`);
+      }*/
+      return { ok: true, user: userDelete, }
     } catch (error) {
-      throw new Error(`Ocurrió un error al eliminar el usuario con el ID ${id}: ${error.message}`);
+      throw new NotFoundException(`Ocurrió un error,  ${error.message}`);
     }
   }
 
   async findPaginate({ name, lastName, page, limit }: SearchUserDto) {
     try {
       const [users, total] = await this.userRepository.findAndCount({
-        relations: { rol: true },
+        relations: { rol: true, address: true },
         where: {
           name: Like(`%${name}%`),
-          lastName: Like(`%${lastName}%`)
+          lastName: Like(`%${lastName}%`),
+          isActive: true
         },
         order: { id: 'DESC' },
         skip: (page - 1) * limit,
@@ -136,6 +165,7 @@ export class UsersService {
       });
       console.log(users)
       if (users.length > 0) {
+        for (const user of users) { user.password = undefined }
         let totalPag: number = total / limit;
         if (totalPag % 1 != 0) {
           totalPag = Math.trunc(totalPag) + 1;
@@ -153,7 +183,6 @@ export class UsersService {
           status: HttpStatus.OK,
         };
       }
-
       return {
         ok: false, message: "User not found", status: HttpStatus.NOT_FOUND
       }

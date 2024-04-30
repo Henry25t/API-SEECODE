@@ -15,7 +15,7 @@ export class AuthService {
       
     async login({ email, password }: LoginAuthDto){
         const user = await this.userRepository.findOne({
-            relations: { rol: true},
+            relations: { rol: true, address: true},
             where: {
                 email,
                 isActive: true,
@@ -23,7 +23,7 @@ export class AuthService {
         });
         if(!user || !user.checkPassword(password)){
            return {
-            message: "No se encontro el usuario",
+            message: "No se encontró el usuario",
             ok: false,
             status: HttpStatus.NOT_FOUND,
            }
@@ -33,7 +33,8 @@ export class AuthService {
         const payload = {
             _sub: user.id,
             _name: user.name,
-            _rol: user.rol.name,
+            _rol: user.rol,
+            _address: user.address
         };
 
         const token = this.jwtService.sign(payload);

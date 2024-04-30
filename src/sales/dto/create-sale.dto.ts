@@ -17,6 +17,10 @@ export class CreateSaleDto {
     @IsNotEmpty()
     @IsArray()
     products: Products[]
+
+    @IsNotEmpty()
+    @IsNumber()
+    boxId: number;
 }
 
  interface Products {

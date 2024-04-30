@@ -12,12 +12,18 @@ import { ClientModule } from './client/client.module';
 import { ProductModule } from './product/product.module';
 import { SalesModule } from './sales/sales.module';
 import { DetailSaleModule } from './detail-sale/detail-sale.module';
+import { BoxModule } from './box/box.module';
+/*import { FileModule } from './file/file.module';*/
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    MulterModule.register({
+      dest: './uploads',
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -38,6 +44,8 @@ import { DetailSaleModule } from './detail-sale/detail-sale.module';
     ProductModule,
     SalesModule,
     DetailSaleModule,
+    BoxModule,
+    /*FileModule,*/
   ],
   controllers: [AppController],
   providers: [AppService],
