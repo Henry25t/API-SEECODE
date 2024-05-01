@@ -3,6 +3,8 @@ import { ClientService } from './client.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { jwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { SearProductDto } from 'src/product/dto/search-product.dto';
+import { SearchClientDto } from './dto/search-client.dto';
 
 @UseGuards(jwtAuthGuard)
 @Controller('client')
@@ -15,8 +17,8 @@ export class ClientController {
   }
 
   @Get()
-  findAll() {
-    return this.clientService.findAll();
+  findAll(@Body() searchClient: SearchClientDto) {
+    return this.clientService.findAll(searchClient);
   }
 
   @Get(':id')

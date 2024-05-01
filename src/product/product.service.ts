@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { throwError } from 'rxjs';
+import { SearProductDto } from './dto/search-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -33,19 +34,46 @@ export class ProductService {
     }
   }
 
-  async findAll() {
+  async findAll({ name, code, limit, page}: SearProductDto) {
    try {
-    const product = await this.productRepository.find()
-    if(product.length > 0)
-    {
-      return{
-        ok: true,
-        product
+    const [products, total] = await this.productRepository.findAndCount({
+      where: {
+        name: Like(`%${name}%`),
+        code: Like(`%${code}%`),
+        isActive: true
+      },
+      order: { id: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    console.log(products)
+    if (products.length > 0) {
+      let totalPag: number = total / limit;
+      if (totalPag % 1 != 0) {
+        totalPag = Math.trunc(totalPag) + 1;
       }
+      let nextPag: number = page >= totalPag ? page : Number(page) + 1;
+      let prevPag: number = page <= 1 ? page : page - 1;
+      return {
+        ok: true,
+        products,
+        total,
+        totalPag,
+        currentPage: Number(page),
+        nextPag,
+        prevPag,
+        status: HttpStatus.OK,
+      };
     }
-    throw new NotFoundException(`Ocurrió un error al obtener los productos`)
+    return {
+      ok: false, message: "Products not found", status: HttpStatus.NOT_FOUND
+    }
    } catch (error) {
-    throw new NotFoundException()
+    return{
+      ok: false,
+      message: "Ocurrió un error",
+      status: HttpStatus.INTERNAL_SERVER_ERROR
+    }
    }
   }
 
