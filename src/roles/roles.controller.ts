@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { RolesService } from './roles.service';
 import { CreateRolDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { SearchURoleDto } from './dto/search-role.dto';
 
 @Controller('roles')
 export class RolesController {
@@ -13,8 +14,8 @@ export class RolesController {
   }
 
   @Get()
-  findAll() {
-    return this.rolesService.findAll();
+  findAll(@Body() searchRoleDto: SearchURoleDto) {
+    return this.rolesService.findAll(searchRoleDto);
   }
 
   @Get(':id')

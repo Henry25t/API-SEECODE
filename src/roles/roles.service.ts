@@ -1,10 +1,12 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateRolDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from './entities/role.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { raw } from 'express';
+import { SearchUserDto } from 'src/users/dto/search-user.dto';
+import { SearchURoleDto } from './dto/search-role.dto';
 
 @Injectable()
 export class RolesService {
@@ -25,10 +27,39 @@ export class RolesService {
     }
   }
 
-   async findAll() {
+   async findAll( { name, limit, page}: SearchURoleDto) {
     try {
-      const rol = await this.roleRepository.find({where: {isActive : true}});
-      return{ok: true, rol}
+      const [roles, total] = await this.roleRepository.findAndCount({
+        where: {
+          name: Like(`%${name}%`),
+          isActive: true
+        },
+        order: { id: 'DESC' },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+      console.log(roles)
+      if (roles.length > 0) {
+        let totalPag: number = total / limit;
+        if (totalPag % 1 != 0) {
+          totalPag = Math.trunc(totalPag) + 1;
+        }
+        let nextPag: number = page >= totalPag ? page : Number(page) + 1;
+        let prevPag: number = page <= 1 ? page : page - 1;
+        return {
+          ok: true,
+          roles,
+          total,
+          totalPag,
+          currentPage: Number(page),
+          nextPag,
+          prevPag,
+          status: HttpStatus.OK,
+        };
+      }
+      return {
+        ok: false, message: "Roles not found", status: HttpStatus.NOT_FOUND
+      }
     } catch (error) {
       throw new InternalServerErrorException('Ocurrió un error al obtener los roles.', error);
     }
