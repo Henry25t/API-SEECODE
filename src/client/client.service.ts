@@ -94,7 +94,7 @@ export class ClientService {
 
   async update(id: number, { dui, name, points }: UpdateClientDto) {
     try {
-      const client = await this.clientRepository.findOne({ where: { id } })
+      const client = await this.clientRepository.findOne({ where: { id, isActive: true } })
 
       client.dui = dui,
         client.name = name,
