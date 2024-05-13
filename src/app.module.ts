@@ -15,15 +15,14 @@ import { DetailSaleModule } from './detail-sale/detail-sale.module';
 import { BoxModule } from './box/box.module';
 /*import { FileModule } from './file/file.module';*/
 import { MulterModule } from '@nestjs/platform-express';
+import { FileModule } from './file/file.module';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
-    }),
-    MulterModule.register({
-      dest: './uploads',
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -45,7 +44,8 @@ import { MulterModule } from '@nestjs/platform-express';
     SalesModule,
     DetailSaleModule,
     BoxModule,
-    /*FileModule,*/
+    FileModule,
+    ImageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

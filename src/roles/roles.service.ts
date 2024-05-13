@@ -74,6 +74,7 @@ export class RolesService {
       return {ok: true, role}
     } catch (error) {
       return {ok:false, error}
+      
     }
   }
 
