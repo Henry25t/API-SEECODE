@@ -17,12 +17,19 @@ import { BoxModule } from './box/box.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { FileModule } from './file/file.module';
 import { ImageModule } from './image/image.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { dirname, join } from 'path';
+import { ImageController } from './image/image.controller';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'upload'),
+      serveRoot: '/images',
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -47,7 +54,7 @@ import { ImageModule } from './image/image.module';
     FileModule,
     ImageModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, ImageController],
   providers: [AppService],
 })
 export class AppModule { }

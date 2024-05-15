@@ -1,8 +1,11 @@
-import { Controller, Post, UseInterceptors, UploadedFile, HttpStatus } from '@nestjs/common';
+import { Controller, Post, UseInterceptors, UploadedFile, HttpStatus, Param, Get, Res } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { fileFilter, renameImage } from './helpers/imageges.helper';
-import { ok } from 'assert';
+import { join } from 'path';
+import { readdirSync } from 'fs';
+import { elementAt } from 'rxjs';
+import { json } from 'stream/consumers';
 
 @Controller('image')
 export class ImageController {
@@ -20,11 +23,31 @@ export class ImageController {
     }),
     fileFilter: fileFilter
   }))
-  uploadFile(@UploadedFile() file: Express.Multer.File){
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
     console.log(file);
-    return{
+    return {
       ok: true,
       status: HttpStatus.OK
+    }
+  }
+
+  @Get('all')
+  getAllImages() {
+    try {
+      const uploadPath = join(process.cwd(), 'upload');
+      const images = readdirSync(uploadPath);
+      const imagePaths = images.map(image => `/images/${image}`);
+      return {
+        ok: true,
+        imagePaths,
+        status: HttpStatus.OK
+      };
+    } catch (error) {
+      return{
+        ok: false,
+        message: "Ocurio un eroo" + error.message,
+        status: HttpStatus.INTERNAL_SERVER_ERROR
+      }
     }
   }
 }
