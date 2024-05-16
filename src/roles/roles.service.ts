@@ -16,7 +16,7 @@ export class RolesService {
   ) { }
   async create(createRoleDto: CreateRolDto) {
     try {
-      const rol = this.roleRepository.create(createRoleDto)
+      const rol = this.roleRepository.delete(createRoleDto)
       if(!rol){
         throw new NotFoundException(`No se pudo cear ningun rol`);
       }
@@ -32,7 +32,7 @@ export class RolesService {
       const [roles, total] = await this.roleRepository.findAndCount({
         where: {
           name: Like(`%${name}%`),
-          isActive: true
+          isActive: false
         },
         order: { id: 'DESC' },
         skip: (page - 1) * limit,
@@ -67,7 +67,7 @@ export class RolesService {
 
   async findOne(id: number) {
     try {
-      const role = await this.roleRepository.findOne({where:{id}})
+      const role = await this.roleRepository.findOne({where:{id, isActive: false}})
       if (!role) {
         throw new NotFoundException(`No se encontró ningún rol con el ID ${id}`);
       }
@@ -92,16 +92,12 @@ export class RolesService {
 
   async remove(id: number) {
     try {
-      const rol = await this.roleRepository.findOne({where: {id}})
+      const rol = await this.roleRepository.findOne({where: {id, isActive: false}})
       if(!rol){
         throw new NotFoundException(`No existe ningún registro con el id ${id}`)
       }
-      rol.isActive = false
+      rol.isActive = true
       const rolDelete = await this.roleRepository.save(rol)
-      /*const result = await this.roleRepository.delete(id);
-      if (result.affected === 0) {
-        throw new NotFoundException(`No se encontró ningún rol con el ID ${id}`);
-      }*/
       return {ok:true, result: rolDelete}
     } catch (error) {
       throw new InternalServerErrorException(`Ocurrió un error, ${error.message}`);

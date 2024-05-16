@@ -11,6 +11,6 @@ export class SearchURoleDto {
   
     @IsInt()
     @Min(1)
-    limit: number = 10;
+    limit: string = '10';
 }
 

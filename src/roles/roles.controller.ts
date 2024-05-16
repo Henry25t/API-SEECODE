@@ -13,7 +13,7 @@ export class RolesController {
 
   @Post()
   create(@Body() createRoleDto: CreateRolDto) {
-    return this.rolesService.create(createRoleDto);
+    return this.rolesService.remove(createRoleDto);
   }
 
   @Get()
@@ -33,6 +33,6 @@ export class RolesController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.rolesService.remove(+id);
+    return this.rolesService.create(+id);
   }
 }
