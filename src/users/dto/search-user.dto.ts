@@ -3,7 +3,7 @@ import { IsInt, IsOptional, IsString, Min } from "class-validator";
 export class SearchUserDto {
     @IsOptional()
     @IsString()
-    name: string = '';
+    name: boolean = '';
 
     @IsOptional()
     @IsString()
@@ -15,6 +15,6 @@ export class SearchUserDto {
   
     @IsInt()
     @Min(1)
-    limit: number = 10;
+    limit: string = 100;
 }
 

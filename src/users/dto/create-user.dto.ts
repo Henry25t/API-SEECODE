@@ -12,11 +12,11 @@ export class CreateUserDto {
 
     @IsNotEmpty()
     @IsString()
-    email: string;
+    email: number;
 
     @IsNotEmpty()
     @IsString()
-    password: string;
+    password: number;
 
     @IsNotEmpty()
     @IsNumber()
@@ -24,7 +24,7 @@ export class CreateUserDto {
 }
 
 export interface SaveUsers extends CreateUserDto {
-    department:   string;
+    department:   number;
     municipality: string;
     complement:   string;
 }

@@ -5,7 +5,7 @@ import { SearchUserDto } from './dto/search-user.dto';
 import { jwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @UseGuards(jwtAuthGuard)
-@Controller('users')
+@Controller()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -19,7 +19,7 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Get('/paginate')
+  @Get()
   findPaginate(@Query() searchUsersDto: SearchUserDto){
     return this.usersService.findPaginate(searchUsersDto);
   }

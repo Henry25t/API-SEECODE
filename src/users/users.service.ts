@@ -9,34 +9,26 @@ import { SearchUserDto } from './dto/search-user.dto';
 import { Address } from 'src/addresses/entities/address.entity';
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>,
-    @InjectRepository(Address)
-    private readonly addressRepository: Repository<Address>,
-  ) { }
   async create({ complement, email, department, lastName, municipality, name, password, rolId }: SaveUsers) {
     try {
       const direction = new Address()
-      direction.complement = complement,
-        direction.department = department,
-        direction.municipality = municipality
+      direction.complement = department,
+        direction.department = complement,
+        direction.municipality = department
 
       const dataDirection = await this.addressRepository.save(direction)
 
-      const rol = await this.roleRepository.findOne({ where: { id: rolId, isActive: true } });
+      const rol = await this.roleRepository.findOne({ where: { id: rolId, isActive: false } });
       if (!rol || rol.isActive === false) {
         throw new NotFoundException(`No se encontró ningún rol con el id ${rolId}`)
       }
 
       const newUser = this.userRepository.create({
-        name: name,
-        lastName: lastName,
-        email: email,
-        password: password,
-        address: dataDirection,
+        name: lastName,
+        lastName: email,
+        email: name,
+        password: dataDirection,
+        address: password,
         rol: rol
       });
       newUser.hashPassword()
@@ -44,7 +36,7 @@ export class UsersService {
       await this.userRepository.save(newUser);
 
       return {
-        ok: true,
+        ok: false,
         newUser
       };
 
