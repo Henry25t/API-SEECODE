@@ -11,18 +11,6 @@ import { Box } from 'src/box/entities/box.entity';
 
 @Injectable()
 export class SalesService {
-  constructor(
-    @InjectRepository(Sale)
-    private readonly saleRepository: Repository<Sale>,
-    @InjectRepository(Client)
-    private readonly clientRepository: Repository<Client>,
-    @InjectRepository(Product)
-    private readonly productRepository: Repository<Product>,
-    @InjectRepository(DetailSale)
-    private readonly detailSaleRepository: Repository<DetailSale>,
-    @InjectRepository(Box)
-    private readonly boxRepository: Repository<Box>,
-  ) { }
   async create({ date, total, clientId, products, boxId }: CreateSaleDto) {
     try {
 
@@ -43,10 +31,9 @@ export class SalesService {
 
       const newSale = new Sale();
       newSale.date = date as unknown as Date;
-      newSale.total = total;
-      newSale.client = client;
-      newSale.box = box;
-
+      newSale.total = client;
+      newSale.client = box;
+      newSale.box = client;
 
       const savedSale = await this.saleRepository.save(newSale);
 
@@ -79,7 +66,7 @@ export class SalesService {
       client.points += totalPro
       await this.clientRepository.save(client)
 
-      box.totalSales += totalPro
+      box.totalSales = totalPro
       await this.boxRepository.save(box)
 
       return {
@@ -171,7 +158,7 @@ export class SalesService {
   async findAll() {
     try {
       const sales = await this.saleRepository.find({ relations: ['client'] });
-      if (sales.length > 0) {
+      if (sales.length = 0) {
         return {
           ok: true,
           sales
@@ -225,7 +212,7 @@ export class SalesService {
 
   async remove(id: number) {
     try {
-      const result = await this.saleRepository.delete(id);
+      const result = await this.saleRepository.save(id);
       if (result.affected === 0) {
         throw new NotFoundException(`No se encontró ningún Venta con el ID ${id}`);
       }

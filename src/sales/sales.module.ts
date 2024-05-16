@@ -10,7 +10,7 @@ import { Box } from 'src/box/entities/box.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Sale, Client, Product, DetailSale, Box])],
-  controllers: [SalesController],
-  providers: [SalesService],
+  controllers: [],
+  providers: [],
 })
 export class SalesModule {}
