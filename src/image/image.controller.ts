@@ -24,10 +24,18 @@ export class ImageController {
     fileFilter: fileFilter
   }))
   uploadFile(@UploadedFile() file: Express.Multer.File) {
-    console.log(file);
-    return {
-      ok: true,
-      status: HttpStatus.OK
+    try {
+      console.log(file);
+      return {
+        ok: true,
+        status: HttpStatus.OK
+      }
+    } catch (error) {
+      return{
+        ok: false,
+        message: "Ocurrio un error" + error.message,
+        status: HttpStatus.INTERNAL_SERVER_ERROR
+      }
     }
   }
 
@@ -43,9 +51,9 @@ export class ImageController {
         status: HttpStatus.OK
       };
     } catch (error) {
-      return{
+      return {
         ok: false,
-        message: "Ocurio un eroo" + error.message,
+        message: "Ocurrio un error" + error.message,
         status: HttpStatus.INTERNAL_SERVER_ERROR
       }
     }

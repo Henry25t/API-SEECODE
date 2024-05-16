@@ -4,7 +4,10 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SearProductDto } from './dto/search-product.dto';
 import { jwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/roles/rolesPermiso/role.permiso';
+import { Role } from 'src/roles/entities/role.entity';
 
+@Roles('Administrador', 'Usuario')
 @UseGuards(jwtAuthGuard)
 @Controller('product')
 export class ProductController {

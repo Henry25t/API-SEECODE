@@ -1,3 +1,5 @@
+import { HttpStatus } from "@nestjs/common";
+
 export const renameImage = (req, file, callback) => {
     const name = file.originalname.split('.')[0];
     const fileName = file.originalname;
