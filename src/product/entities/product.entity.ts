@@ -1,22 +1,22 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
-@Entity()
+
 export class Product {
-    @PrimaryGeneratedColumn()
+    PrimaryGeneratedColumn
     id: number
 
-    @Column()
+    Column
     name: string;
 
-    @Column()
+    Column
     code: string;
 
-    @Column()
+    Column
     stock: number;
 
-    @Column()
+    Column
     price: number;
 
-    @Column({default: true})
+    Column({default: true})
     isActive: boolean;
 }
