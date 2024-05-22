@@ -6,20 +6,25 @@ import { Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { throwError } from 'rxjs';
 import { SearProductDto } from './dto/search-product.dto';
+import { Category } from 'src/category/entities/category.entity';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>
   ) { }
-  async create( { code, name, price, stock,}: CreateProductDto) {
+  async create( { code, name, price, stock, categoryId}: CreateProductDto) {
     try {
+      const category = await this.categoryRepository.findOne({where: {id: categoryId, isActive: true}})
       const product = await this.productRepository.create({
         name: name,
         code: code,
         stock: stock,
-        price: price
+        price: price,
+        category: category
       });
       if(!product){
         throw new NotFoundException(`No se pudo crear ningún producto`);
@@ -42,6 +47,7 @@ export class ProductService {
         code: Like(`%${code}%`),
         isActive: true
       },
+      relations: {category: true},
       order: { id: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
@@ -79,7 +85,7 @@ export class ProductService {
 
   async findOne(id: number) {
     try {
-      const product = await this.productRepository.findOne({where: {id}})
+      const product = await this.productRepository.findOne({where: {id}, relations: {category: true}})
       if(!product){
         throw new NotFoundException(`No se encontró ningún Producto con el Id ${id}`)
       }
@@ -92,14 +98,16 @@ export class ProductService {
     }
   }
 
-  async update(id: number, { code, name, price, stock}: UpdateProductDto) {
+  async update(id: number, { code, name, price, stock, categoryId}: UpdateProductDto) {
     try {
+      const category = await this.categoryRepository.findOne({where: {id: categoryId}})
       const product = await this.productRepository.findOne({where: {id}})
 
     product.name = name,
     product.code = code,
     product.price = price,
-    product.stock = stock
+    product.stock = stock,
+    product.category = category,
 
     await this.productRepository.save(product)
     return{

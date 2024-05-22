@@ -1,4 +1,4 @@
-import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { Sale } from './entities/sale.entity';
@@ -243,10 +243,16 @@ export class SalesService {
       },
     });
 
-    return sales.map(sale => ({
+    const date = sales.map(sale => ({
       date: sale.date,
       total: sale.total,
     }));
+
+    return{
+      ok: true,
+      date,
+      status: HttpStatus.OK
+    }
 
   }
 }
