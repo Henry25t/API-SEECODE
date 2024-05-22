@@ -20,6 +20,7 @@ import { ImageModule } from './image/image.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { dirname, join } from 'path';
 import { ImageController } from './image/image.controller';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { ImageController } from './image/image.controller';
     BoxModule,
     FileModule,
     ImageModule,
+    CategoryModule,
   ],
   controllers: [AppController, ImageController],
   providers: [AppService],
