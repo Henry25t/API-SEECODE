@@ -2,12 +2,13 @@ import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/c
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { Sale } from './entities/sale.entity';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Client } from 'src/client/entities/client.entity';
 import { Product } from 'src/product/entities/product.entity';
 import { DetailSale } from 'src/detail-sale/entities/detail-sale.entity';
 import { Box } from 'src/box/entities/box.entity';
+import { FindByDateDto } from './dto/findByDate-sale.dto';
 
 @Injectable()
 export class SalesService {
@@ -233,5 +234,19 @@ export class SalesService {
     } catch (error) {
       throw new Error(`Ocurrió un error al eliminar el Venta con el ID ${id}: ${error.message}`);
     }
+  }
+
+  async findByDate({ endDate, initialDate}: FindByDateDto){
+    const sales = await this.saleRepository.find({
+      where: {
+        date: Between(initialDate as unknown as Date, endDate as unknown as Date),
+      },
+    });
+
+    return sales.map(sale => ({
+      date: sale.date,
+      total: sale.total,
+    }));
+
   }
 }

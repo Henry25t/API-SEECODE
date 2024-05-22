@@ -4,6 +4,7 @@ import { CreateSaleDto} from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { DetailSale } from 'src/detail-sale/entities/detail-sale.entity';
 import { jwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { FindByDateDto } from './dto/findByDate-sale.dto';
 
 @UseGuards(jwtAuthGuard)
 @Controller('sales')
@@ -18,6 +19,11 @@ export class SalesController {
   @Post('/createQueryRunner')
   createQueryRunner(@Body() createSaleDto: CreateSaleDto) {
     return this.salesService.createQueryRunner(createSaleDto);
+  }
+
+  @Post('/findByDate')
+  findByDate(@Body() findByDate : FindByDateDto) {
+    return this.salesService.findByDate(findByDate);
   }
 
   @Get()
