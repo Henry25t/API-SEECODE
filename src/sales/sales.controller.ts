@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { SalesService } from './sales.service';
 import { CreateSaleDto} from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
@@ -21,8 +21,8 @@ export class SalesController {
     return this.salesService.createQueryRunner(createSaleDto);
   }
 
-  @Post('/findByDate')
-  findByDate(@Body() findByDate : FindByDateDto) {
+  @Get('/findByDate')
+  findByDate(@Query() findByDate : FindByDateDto) {
     return this.salesService.findByDate(findByDate);
   }
 

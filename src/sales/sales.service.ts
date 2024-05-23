@@ -236,23 +236,48 @@ export class SalesService {
     }
   }
 
-  async findByDate({ endDate, initialDate}: FindByDateDto){
-    const sales = await this.saleRepository.find({
-      where: {
-        date: Between(initialDate as unknown as Date, endDate as unknown as Date),
-      },
-    });
-
-    const date = sales.map(sale => ({
-      date: sale.date,
-      total: sale.total,
-    }));
-
-    return{
-      ok: true,
-      date,
-      status: HttpStatus.OK
+  async findByDate({ endDate, initialDate }: FindByDateDto) {
+    try {
+      const sales = await this.saleRepository.find({
+        where: {
+          date: Between(initialDate as unknown as Date, endDate as unknown as Date),
+        },
+      });
+  
+      if (sales.length > 0) {
+        const totalsByDate = sales.reduce((acc, sale) => {
+          const saleDate = new Date(sale.date);
+          const dateStr = saleDate.toISOString().split('T')[0]; 
+          
+          if (!acc[dateStr]) {
+            acc[dateStr] = 0;
+          }
+          acc[dateStr] += sale.total;
+          return acc;
+        }, {});
+  
+        const dateTotals = Object.keys(totalsByDate).map(date => ({
+          date,
+          total: totalsByDate[date]
+        }));
+  
+        return {
+          ok: true,
+          data: dateTotals,
+          status: HttpStatus.OK
+        };
+      }
+      return {
+        ok: false,
+        message: "Not found",
+        status: HttpStatus.NOT_FOUND
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        message: "Error en el servidor: " + error.message,
+        status: HttpStatus.INTERNAL_SERVER_ERROR
+      };
     }
-
-  }
+  }  
 }
