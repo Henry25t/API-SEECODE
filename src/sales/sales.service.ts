@@ -124,7 +124,7 @@ export class SalesService {
 
       for (const pro of products) {
         const product = await queryRunner.manager.findOne(Product, { where: { id: pro.productId, isActive: true } });
-        if(!product || product.isActive === false){
+        if (!product || product.isActive === false) {
           throw new NotAcceptableException(`no se encontró el producto con el id: ${pro.productId}`)
         }
 
@@ -151,7 +151,7 @@ export class SalesService {
 
       box.totalSales += totalPro;
       await queryRunner.manager.save(Box, box);
-      
+
       savedSale.total += totalPro;
       await queryRunner.manager.save(Sale, savedSale);
 
@@ -243,27 +243,27 @@ export class SalesService {
           date: Between(initialDate as unknown as Date, endDate as unknown as Date),
         },
       });
-  
-      if (sales.length > 0) {
-        const totalsByDate = sales.reduce((acc, sale) => {
-          const saleDate = new Date(sale.date);
-          const dateStr = saleDate.toISOString().split('T')[0]; 
-          
-          if (!acc[dateStr]) {
-            acc[dateStr] = 0;
-          }
-          acc[dateStr] += sale.total;
-          return acc;
-        }, {});
-  
-        const dateTotals = Object.keys(totalsByDate).map(date => ({
-          date,
-          total: totalsByDate[date]
+
+      function sumaTotalFecha(sales) {
+        const ventasPorFecha = {};
+        sales.map(sale => {
+          const fecha = sale.date;
+          const totalVentas = sale.total;
+          ventasPorFecha[fecha] = (ventasPorFecha[fecha] || 0) + totalVentas;
+        });
+        const ventasArray = Object.keys(ventasPorFecha).map(fecha => ({
+          date: fecha,
+          total: ventasPorFecha[fecha]
         }));
-  
+
+        return ventasArray;
+      }
+
+      if (sales.length > 0) {
+        const ventasPorFecha = sumaTotalFecha(sales);
         return {
           ok: true,
-          data: dateTotals,
+          data: ventasPorFecha,
           status: HttpStatus.OK
         };
       }
@@ -279,5 +279,5 @@ export class SalesService {
         status: HttpStatus.INTERNAL_SERVER_ERROR
       };
     }
-  }  
+  }
 }
