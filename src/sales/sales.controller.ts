@@ -36,6 +36,12 @@ export class SalesController {
     return this.salesService.findOne(+id);
   }
 
+  @Get('/clientData/:id')
+  findClient(@Param('id') id: string) {
+    Number(id)
+    return this.salesService.findClient(+id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSaleDto: UpdateSaleDto) {
     return this.salesService.update(+id, updateSaleDto);

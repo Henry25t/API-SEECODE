@@ -4,6 +4,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SearProductDto } from './dto/search-product.dto';
 import { jwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { FindProductByDateDto } from './dto/findByDate-product';
 
 @UseGuards(jwtAuthGuard)
 @Controller('product')
@@ -15,8 +16,13 @@ export class ProductController {
     return this.productService.create(createProductDto);
   }
 
+  @Get('/productByDate')
+  findAll(@Query() findProductByDateDto: FindProductByDateDto) {
+    return this.productService.findByDate(findProductByDateDto);
+  }
+
   @Get()
-  findAll(@Query() searchProductDto : SearProductDto) {
+  findByDate(@Query() searchProductDto : SearProductDto) {
     return this.productService.findAll(searchProductDto);
   }
 

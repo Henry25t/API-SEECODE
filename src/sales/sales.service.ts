@@ -280,4 +280,42 @@ export class SalesService {
       };
     }
   }
+
+  async findClient(id: number) {
+    try {
+      const client = await this.clientRepository.findOne({ where: { id, isActive: true } })
+      if (!client) {
+        throw new NotFoundException("client not find")
+      }
+      const sales = await this.saleRepository.find({ where: { client: {id: client.id }} })
+      let totalCantidad = 0;
+      let totalVentas = 0;
+
+      for (const sale of sales) {
+        const detailSale = await this.detailSaleRepository.find({ where: { sale: {id:sale.id }} })
+        for (const detail of detailSale) {
+          totalCantidad += detail.cantidad,
+          totalVentas += detail.total
+        }
+      }
+
+      const clientData = {
+        client: client.name,
+        cantidad: totalCantidad,
+        total: totalVentas
+      }
+
+      return {
+        ok: true,
+        clientData,
+        status: HttpStatus.OK
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        message: error.message,
+        status: HttpStatus.INTERNAL_SERVER_ERROR
+      }
+    }
+  }
 }

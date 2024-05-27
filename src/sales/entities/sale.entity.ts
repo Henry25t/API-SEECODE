@@ -1,14 +1,14 @@
 import { Box } from 'src/box/entities/box.entity';
 import { Client } from 'src/client/entities/client.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, RelationId } from 'typeorm'
+import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn, RelationId } from 'typeorm'
 
 @Entity()
 export class Sale {
     @PrimaryGeneratedColumn()
     id: number;
 
-   @Column({type: 'date'})
-   date: Date;
+    @Column({ type: 'date' })
+    date: Date;
 
     @Column()
     total: number;
