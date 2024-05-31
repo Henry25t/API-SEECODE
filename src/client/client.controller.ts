@@ -12,7 +12,7 @@ export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
   @Post()
-  create(@Query() createClientDto: CreateClientDto) {
+  create(@Body() createClientDto: CreateClientDto) {
     return this.clientService.create(createClientDto);
   }
 

@@ -5,6 +5,7 @@ import { UpdateSaleDto } from './dto/update-sale.dto';
 import { DetailSale } from 'src/detail-sale/entities/detail-sale.entity';
 import { jwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { FindByDateDto } from './dto/findByDate-sale.dto';
+import { SearchSalesDto } from './dto/search.sale.dto';
 
 @UseGuards(jwtAuthGuard)
 @Controller('sales')
@@ -27,8 +28,8 @@ export class SalesController {
   }
 
   @Get()
-  findAll() {
-    return this.salesService.findAll();
+  findAll(@Query() searchSaleDto: SearchSalesDto) {
+    return this.salesService.findAll(searchSaleDto);
   }
 
   @Get(':id')

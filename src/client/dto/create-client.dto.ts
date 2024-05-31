@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateClientDto {
     @IsNotEmpty()
@@ -10,6 +10,6 @@ export class CreateClientDto {
     dui: string;
 
     @IsNotEmpty()
-    @IsString()
+    @IsNumber()
     points: number;
 }

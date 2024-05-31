@@ -20,6 +20,10 @@ export class ProductController {
   findAll(@Query() findProductByDateDto: FindProductByDateDto) {
     return this.productService.findByDate(findProductByDateDto);
   }
+  @Get('/productByDateQueyBuilder')
+  findByQueryBuilder(@Query() findProductByDateDto: FindProductByDateDto) {
+    return this.productService.findByDateQueryBuilder(findProductByDateDto);
+  }
 
   @Get()
   findByDate(@Query() searchProductDto : SearProductDto) {

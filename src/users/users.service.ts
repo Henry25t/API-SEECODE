@@ -1,12 +1,13 @@
 import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { SaveUsers } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Like, Repository } from 'typeorm';
 import { Role } from 'src/roles/entities/role.entity';
 import { SearchUserDto } from './dto/search-user.dto';
 import { Address } from 'src/addresses/entities/address.entity';
+import * as moment from 'moment-timezone';
+
 @Injectable()
 export class UsersService {
   constructor(

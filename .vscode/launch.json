@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "node",
+        "request": "launch",
+        "name": "NestJS: Debug",
+        "runtimeExecutable": "npm",
+        "runtimeArgs": [
+          "run",
+          "start:debug"
+        ],
+        "port": 3000,
+        "skipFiles": ["<node_internals>/"],
+        "outFiles": ["${workspaceFolder}/dist//*.js"]
+      },
+      {
+        "type": "node",
+        "request": "attach",
+        "name": "NestJS: Attach",
+        "port": 3000,
+        "address": "localhost",
+        "localRoot": "${workspaceFolder}",
+        "remoteRoot": null,
+        "skipFiles": ["<node_internals>/"]
+    }
+  ]
+}

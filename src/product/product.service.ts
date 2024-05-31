@@ -184,4 +184,51 @@ export class ProductService {
       }
     }
   }
+
+  async findByDateQueryBuilder({ endDate, initialDate }: FindProductByDateDto) {
+    try {
+      const saleDateQueryBuilder = this.saleRepository.createQueryBuilder('sale')
+        .where('sale.date BETWEEN :initialDate AND :endDate', { initialDate, endDate });
+  
+      const saleDate = await saleDateQueryBuilder.getMany();
+  
+      const salesDateIds = saleDate.map(sales => sales.id);
+  
+      const productByDateQueryBuilder = this.detailsSaleRepository.createQueryBuilder('detailsSale')
+        .leftJoinAndSelect('detailsSale.product', 'product')
+        .where('detailsSale.saleId IN (:...salesDateIds)', { salesDateIds });
+  
+      const productByDate = await productByDateQueryBuilder.getMany();
+  
+      let productDetails = [];
+      for (const pro of productByDate) {
+        if (pro.product) {
+          let existingProduct = productDetails.find(item => item.name === pro.product.name);
+  
+          if (existingProduct) {
+            existingProduct.cantidad += pro.cantidad || 0;
+            existingProduct.total += pro.total || 0;
+          } else {
+            productDetails.push({
+              name: pro.product.name,
+              cantidad: pro.cantidad || 0,
+              total: pro.total || 0
+            });
+          }
+        }
+      }
+  
+      return {
+        ok: true,
+        productDetails,
+        status: HttpStatus.OK
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        message: "Error en el servidor: " + error.message,
+        status: HttpStatus.INTERNAL_SERVER_ERROR
+      };
+    }
+  } 
 }

@@ -2,13 +2,14 @@ import { HttpStatus, Injectable, NotAcceptableException, NotFoundException } fro
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { Sale } from './entities/sale.entity';
-import { Between, Repository } from 'typeorm';
+import { Between, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Client } from 'src/client/entities/client.entity';
 import { Product } from 'src/product/entities/product.entity';
 import { DetailSale } from 'src/detail-sale/entities/detail-sale.entity';
 import { Box } from 'src/box/entities/box.entity';
 import { FindByDateDto } from './dto/findByDate-sale.dto';
+import { SearchSalesDto } from './dto/search.sale.dto';
 
 @Injectable()
 export class SalesService {
@@ -169,17 +170,42 @@ export class SalesService {
     }
   }
 
-  async findAll() {
+  async findAll( {limit, page}: SearchSalesDto) {
     try {
-      const sales = await this.saleRepository.find({ relations: ['client'] });
+      const [sales, total] = await this.saleRepository.findAndCount({
+        relations: { box: true, client: true },
+        // where: {
+        //   date: Like(`%${date1}%`)
+        // },
+        order: { id: 'DESC' },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+      console.log(sales)
       if (sales.length > 0) {
+        let totalPag: number = total / limit;
+        if (totalPag % 1 != 0) {
+          totalPag = Math.trunc(totalPag) + 1;
+        }
+        let nextPag: number = page >= totalPag ? page : Number(page) + 1;
+        let prevPag: number = page <= 1 ? page : page - 1;
         return {
           ok: true,
-          sales
-        }
+          sales,
+          total,
+          totalPag,
+          currentPage: Number(page),
+          nextPag,
+          prevPag,
+          status: HttpStatus.OK,
+        };
       }
+      return {
+        ok: false, message: "User not found", status: HttpStatus.NOT_FOUND
+      }
+
     } catch (error) {
-      throw new NotFoundException(`Ocurrió un error al obtener las ventas`)
+      throw new NotFoundException(`Ocurrió un erro ${error.message}`)
     }
   }
 
