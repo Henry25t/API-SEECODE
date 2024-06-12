@@ -17,7 +17,7 @@ export class ClientController {
   }
 
   @Get()
-  findAll(@Body() searchClient: SearchClientDto) {
+  findAll(@Query() searchClient: SearchClientDto) {
     return this.clientService.findAll(searchClient);
   }
 

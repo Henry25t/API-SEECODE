@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -66,14 +66,10 @@ export class ClientService {
         };
       }
       return {
-        ok: false, message: "client not found", status: HttpStatus.NOT_FOUND
+        ok: false, message: "Clients not found", status: HttpStatus.NOT_FOUND
       }
     } catch (error) {
-      return{
-        ok: false,
-        message: "Ocurrió un error" + error.message,
-        status: HttpStatus.INTERNAL_SERVER_ERROR
-      }
+      throw new InternalServerErrorException('Ocurrió un error al obtener los clients.', error);
     }
   }
 
