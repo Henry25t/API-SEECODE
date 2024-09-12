@@ -1,26 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { CreateImageDto } from './dto/create-image.dto';
-import { UpdateImageDto } from './dto/update-image.dto';
+import { v2 as Cloudinary } from 'cloudinary';
+
+Cloudinary.config({
+  cloud_name: 'davat3lak',
+  api_key: '883883283968626',
+  api_secret: 'Auku68vQBLKfro9whT7uwW0bf9E',
+});
 
 @Injectable()
 export class ImageService {
-  create(createImageDto: CreateImageDto) {
-    return 'This action adds a new image';
-  }
-
-  findAll() {
-    return `This action returns all image`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} image`;
-  }
-
-  update(id: number, updateImageDto: UpdateImageDto) {
-    return `This action updates a #${id} image`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} image`;
+  async uploadImageToCloudinary(file: Express.Multer.File): Promise<any> {
+    return new Promise((resolve, reject) => {
+      Cloudinary.uploader.upload_stream({ resource_type: 'auto' }, (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }).end(file.buffer);
+    });
   }
 }

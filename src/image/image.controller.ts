@@ -6,16 +6,23 @@ import { join } from 'path';
 import { readdirSync } from 'fs';
 import { elementAt } from 'rxjs';
 import { json } from 'stream/consumers';
+import { ImageService } from './image.service';
 
 @Controller('image')
 export class ImageController {
 
-  // @Post('upload')
-  // @UseInterceptors(FileInterceptor('file'))
-  // uploadFile(@UploadedFile() file: Express.Multer.File){
-  //   console.log(file);
-  // }
+  constructor(private readonly cloudinaryService: ImageService) {}
+
   @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))  // 'file' es el nombre del campo que recibirá la imagen
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    const result = await this.cloudinaryService.uploadImageToCloudinary(file);
+    return {
+      message: 'Image uploaded successfully',
+      url: result.secure_url, // URL de la imagen subida
+    };
+  }
+  /*@Post('upload')
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
       destination: './upload',
@@ -29,7 +36,7 @@ export class ImageController {
       ok: true,
       status: HttpStatus.OK
     }
-  }
+  }*/
 
   @Get('all')
   getAllImages() {
