@@ -17,11 +17,12 @@ export class ImageController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))  // 'file' es el nombre del campo que recibirá la imagen
   async uploadImage(@UploadedFile() file: Express.Multer.File, @Body() createImageDto : CreateImageDto) {
-    const result = await this.cloudinaryService.uploadImageToCloudinary(file, createImageDto);
-    return {
-      message: 'Image uploaded successfully',
-      url: result.secure_url, // URL de la imagen subida
-    };
+    return this.cloudinaryService.uploadImageToCloudinary(file, createImageDto);
+  }
+
+  @Get('FindOne/:id')
+  async findOne(@Param('id') id: number) {
+    return this.cloudinaryService.findOne(id);
   }
   /*@Post('upload')
   @UseInterceptors(FileInterceptor('file', {
