@@ -1,4 +1,4 @@
-import { Controller, Post, UseInterceptors, UploadedFile, HttpStatus, Param, Get, Res } from '@nestjs/common';
+import { Controller, Post, UseInterceptors, UploadedFile, HttpStatus, Param, Get, Res, Body } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { fileFilter, renameImage } from './helpers/imageges.helper';
@@ -7,6 +7,7 @@ import { readdirSync } from 'fs';
 import { elementAt } from 'rxjs';
 import { json } from 'stream/consumers';
 import { ImageService } from './image.service';
+import { CreateImageDto } from './dto/create-image.dto';
 
 @Controller('image')
 export class ImageController {
@@ -15,8 +16,8 @@ export class ImageController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))  // 'file' es el nombre del campo que recibirá la imagen
-  async uploadImage(@UploadedFile() file: Express.Multer.File) {
-    const result = await this.cloudinaryService.uploadImageToCloudinary(file);
+  async uploadImage(@UploadedFile() file: Express.Multer.File, @Body() createImageDto : CreateImageDto) {
+    const result = await this.cloudinaryService.uploadImageToCloudinary(file, createImageDto);
     return {
       message: 'Image uploaded successfully',
       url: result.secure_url, // URL de la imagen subida
